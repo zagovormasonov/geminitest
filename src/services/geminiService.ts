@@ -25,12 +25,13 @@ class GeminiService {
         this.genAI = new GoogleGenerativeAI(apiKey);
       }
 
-      // Пробуем разные модели в порядке приоритета (от новых к старым)
+      // Пробуем разные модели в порядке приоритета (от самых новых к старым)
       const models = [
-        'gemini-2.0-flash-exp',  // Самая новая экспериментальная модель
+        'gemini-2.5-pro',        // Самая мощная модель Gemini 2.5 Pro
+        'gemini-2.0-flash-exp',  // Экспериментальная версия Gemini 2.0
         'gemini-2.0-flash',      // Стабильная версия Gemini 2.0
-        'gemini-1.5-flash',      // Быстрая модель 1.5
         'gemini-1.5-pro',        // Мощная модель 1.5
+        'gemini-1.5-flash',      // Быстрая модель 1.5
         'gemini-pro'             // Старая версия для совместимости
       ];
       let lastError: Error | null = null;

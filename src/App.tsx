@@ -49,7 +49,7 @@ function App() {
       <div className="container">
         <header className="header">
           <h1>🧠 Психологический Совет</h1>
-          <p>Получите мудрый совет от ИИ для улучшения вашего психологического состояния</p>
+          <p>Получите мудрый совет от Gemini 2.5 Pro для улучшения вашего психологического состояния</p>
         </header>
 
         <main className="main">
@@ -103,7 +103,7 @@ function App() {
         </main>
 
         <footer className="footer">
-          <p>Powered by Google Gemini AI</p>
+          <p>Powered by Google Gemini 2.5 Pro AI</p>
         </footer>
       </div>
     </div>
