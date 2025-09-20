@@ -25,20 +25,42 @@ class GeminiService {
         this.genAI = new GoogleGenerativeAI(apiKey);
       }
 
-      const model = this.genAI!.getGenerativeModel({ model: 'gemini-pro' });
+      // Пробуем разные модели в порядке приоритета
+      const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+      let lastError: Error | null = null;
+
+      for (const modelName of models) {
+        try {
+          console.log(`Пробуем модель: ${modelName}`);
+          const model = this.genAI!.getGenerativeModel({ model: modelName });
+          
+          const prompt = "Напиши психологический совет";
+          
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const text = response.text();
+          
+          console.log(`Успешно использована модель: ${modelName}`);
+          return text;
+        } catch (modelError) {
+          console.warn(`Модель ${modelName} недоступна:`, modelError);
+          lastError = modelError as Error;
+          continue;
+        }
+      }
+
+      // Если все модели не работают, выбрасываем последнюю ошибку
+      throw lastError || new Error('Все модели Gemini недоступны');
       
-      const prompt = "Напиши психологический совет";
-      
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      return text;
     } catch (error) {
       console.error('Gemini API Error:', error);
       
       if (error instanceof Error && error.message.includes('API ключ')) {
         throw error;
+      }
+      
+      if (error instanceof Error && error.message.includes('модели')) {
+        throw new Error('Все модели Gemini API недоступны. Попробуйте позже или обратитесь в поддержку Google.');
       }
       
       throw new Error('Ошибка при получении ответа от Gemini API. Проверьте подключение к интернету и настройки API.');
