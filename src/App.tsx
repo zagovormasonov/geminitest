@@ -6,6 +6,7 @@ interface AdviceState {
   advice: string | null;
   loading: boolean;
   error: string | null;
+  modelUsed?: string;
 }
 
 function App() {
@@ -27,8 +28,13 @@ function App() {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const advice = await geminiService.getPsychologicalAdvice();
-      setState(prev => ({ ...prev, advice, loading: false }));
+      const result = await geminiService.getPsychologicalAdvice();
+      setState(prev => ({ 
+        ...prev, 
+        advice: result.advice, 
+        modelUsed: result.modelUsed,
+        loading: false 
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -86,6 +92,11 @@ function App() {
                 <div className="advice-text">
                   {state.advice}
                 </div>
+                {state.modelUsed && (
+                  <div className="model-info">
+                    <small>🤖 Сгенерировано моделью: {state.modelUsed}</small>
+                  </div>
+                )}
               </div>
             )}
           </div>

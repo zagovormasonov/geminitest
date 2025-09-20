@@ -109,6 +109,19 @@ body {
   white-space: pre-wrap;
 }
 
+.model-info {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.model-info small {
+  color: #718096;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 /* Инструкции по настройке */
 .setup-instructions {
   background: linear-gradient(135deg, #fef5e7 0%, #fbd38d 100%);

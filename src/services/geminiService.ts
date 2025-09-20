@@ -13,7 +13,7 @@ class GeminiService {
     }
   }
 
-  async getPsychologicalAdvice(): Promise<string> {
+  async getPsychologicalAdvice(): Promise<{ advice: string; modelUsed: string }> {
     try {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       
@@ -25,8 +25,14 @@ class GeminiService {
         this.genAI = new GoogleGenerativeAI(apiKey);
       }
 
-      // Пробуем разные модели в порядке приоритета
-      const models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+      // Пробуем разные модели в порядке приоритета (от новых к старым)
+      const models = [
+        'gemini-2.0-flash-exp',  // Самая новая экспериментальная модель
+        'gemini-2.0-flash',      // Стабильная версия Gemini 2.0
+        'gemini-1.5-flash',      // Быстрая модель 1.5
+        'gemini-1.5-pro',        // Мощная модель 1.5
+        'gemini-pro'             // Старая версия для совместимости
+      ];
       let lastError: Error | null = null;
 
       for (const modelName of models) {
@@ -40,8 +46,8 @@ class GeminiService {
           const response = await result.response;
           const text = response.text();
           
-          console.log(`Успешно использована модель: ${modelName}`);
-          return text;
+          console.log(`✅ Успешно использована модель: ${modelName}`);
+          return { advice: text, modelUsed: modelName };
         } catch (modelError) {
           console.warn(`Модель ${modelName} недоступна:`, modelError);
           lastError = modelError as Error;
