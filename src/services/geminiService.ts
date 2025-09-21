@@ -5,7 +5,7 @@ class GeminiService {
   constructor() {
     // В продакшене используем Railway URL, в разработке - localhost
     this.baseUrl = import.meta.env.PROD 
-      ? 'https://your-railway-app.railway.app' 
+      ? 'https://geminitest-production-3230.up.railway.app' 
       : 'http://localhost:3000';
   }
 
