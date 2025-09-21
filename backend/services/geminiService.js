@@ -4,6 +4,7 @@ class GeminiService {
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
+      console.error('❌ GEMINI_API_KEY не найден в переменных окружения');
       throw new Error('GEMINI_API_KEY не найден в переменных окружения');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
