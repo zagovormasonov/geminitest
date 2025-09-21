@@ -3,8 +3,8 @@ nixPkgs = ["nodejs", "npm"]
 
 [phases.install]
 cmds = [
-  "npm ci",
-  "cd backend && npm ci"
+  "npm install",
+  "cd backend && npm install"
 ]
 
 [phases.build]
