@@ -1,76 +1,53 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
+// Сервис для работы с Gemini API через бэкенд
 class GeminiService {
-  private genAI: GoogleGenerativeAI | null = null;
+  private baseUrl: string;
 
   constructor() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      console.error('Gemini API Error: API ключ не настроен');
-      // Не выбрасываем ошибку в конструкторе, чтобы приложение не падало
-    } else {
-      this.genAI = new GoogleGenerativeAI(apiKey);
-    }
+    // В продакшене используем Railway URL, в разработке - localhost
+    this.baseUrl = import.meta.env.PROD 
+      ? 'https://your-railway-app.railway.app' 
+      : 'http://localhost:3000';
   }
 
   async getPsychologicalAdvice(): Promise<{ advice: string; modelUsed: string }> {
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log('📡 Отправляем запрос на сервер...');
       
-      if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-        throw new Error('API ключ не настроен. Пожалуйста, добавьте VITE_GEMINI_API_KEY в настройки Vercel.');
+      const response = await fetch(`${this.baseUrl}/api/advice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      if (!this.genAI) {
-        this.genAI = new GoogleGenerativeAI(apiKey);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Неизвестная ошибка сервера');
       }
 
-      // Пробуем разные модели в порядке приоритета (от самых новых к старым)
-      const models = [
-        'gemini-2.5-pro',        // Самая мощная модель Gemini 2.5 Pro
-        'gemini-2.0-flash-exp',  // Экспериментальная версия Gemini 2.0
-        'gemini-2.0-flash',      // Стабильная версия Gemini 2.0
-        'gemini-1.5-pro',        // Мощная модель 1.5
-        'gemini-1.5-flash',      // Быстрая модель 1.5
-        'gemini-pro'             // Старая версия для совместимости
-      ];
-      let lastError: Error | null = null;
-
-      for (const modelName of models) {
-        try {
-          console.log(`Пробуем модель: ${modelName}`);
-          const model = this.genAI!.getGenerativeModel({ model: modelName });
-          
-          const prompt = "Напиши психологический совет";
-          
-          const result = await model.generateContent(prompt);
-          const response = await result.response;
-          const text = response.text();
-          
-          console.log(`✅ Успешно использована модель: ${modelName}`);
-          return { advice: text, modelUsed: modelName };
-        } catch (modelError) {
-          console.warn(`Модель ${modelName} недоступна:`, modelError);
-          lastError = modelError as Error;
-          continue;
-        }
-      }
-
-      // Если все модели не работают, выбрасываем последнюю ошибку
-      throw lastError || new Error('Все модели Gemini недоступны');
+      console.log(`✅ Получен совет от модели: ${data.modelUsed}`);
+      return {
+        advice: data.advice,
+        modelUsed: data.modelUsed
+      };
       
     } catch (error) {
-      console.error('Gemini API Error:', error);
+      console.error('❌ Ошибка при запросе к серверу:', error);
       
-      if (error instanceof Error && error.message.includes('API ключ')) {
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          throw new Error('Не удается подключиться к серверу. Проверьте подключение к интернету.');
+        }
         throw error;
       }
       
-      if (error instanceof Error && error.message.includes('модели')) {
-        throw new Error('Все модели Gemini API недоступны. Попробуйте позже или обратитесь в поддержку Google.');
-      }
-      
-      throw new Error('Ошибка при получении ответа от Gemini API. Проверьте подключение к интернету и настройки API.');
+      throw new Error('Произошла неизвестная ошибка при получении совета.');
     }
   }
 }
