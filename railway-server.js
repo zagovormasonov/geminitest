@@ -1,6 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,7 +55,8 @@ app.post('/api/advice', async (req, res) => {
     // Try to load Gemini service
     let geminiService = null;
     try {
-      geminiService = require('./backend/services/geminiService');
+      const geminiModule = await import('./backend/services/geminiService.mjs');
+      geminiService = geminiModule.default;
       console.log('✅ Gemini Service loaded successfully');
     } catch (error) {
       console.warn('⚠️ Gemini Service not available:', error.message);
